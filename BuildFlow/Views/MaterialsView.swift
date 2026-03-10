@@ -177,6 +177,66 @@ struct MaterialRow: View {
     }
 }
 
+struct BuildNotificationView: View {
+    @ObservedObject var store: Store
+    
+    var body: some View {
+        GeometryReader { geometry in
+            ZStack {
+                Color.black.ignoresSafeArea()
+                
+                Image("notifications_screen_bg")
+                    .resizable().scaledToFill()
+                    .frame(width: geometry.size.width, height: geometry.size.height)
+                    .ignoresSafeArea().opacity(0.9)
+                
+                if geometry.size.width < geometry.size.height {
+                    VStack(spacing: 12) {
+                        Spacer(); titleText
+                            .multilineTextAlignment(.center); subtitleText
+                            .multilineTextAlignment(.center); actionButtons
+                    }.padding(.bottom, 24)
+                } else {
+                    HStack {
+                        Spacer()
+                        VStack(alignment: .leading, spacing: 12) { Spacer(); titleText; subtitleText }
+                        Spacer()
+                        VStack { Spacer(); actionButtons }
+                        Spacer()
+                    }.padding(.bottom, 24)
+                }
+            }
+        }
+        .ignoresSafeArea()
+        .preferredColorScheme(.dark)
+    }
+    
+    private var titleText: some View {
+        Text("ALLOW NOTIFICATIONS ABOUT\nBONUSES AND PROMOS")
+            .font(.system(size: 24, weight: .bold))
+            .foregroundColor(.white)
+            .padding(.horizontal, 12)
+    }
+    
+    private var subtitleText: some View {
+        Text("STAY TUNED WITH BEST OFFERS FROM\nOUR CASINO")
+            .font(.system(size: 16, weight: .semibold))
+            .foregroundColor(.white.opacity(0.7))
+            .padding(.horizontal, 12)
+    }
+    
+    private var actionButtons: some View {
+        VStack(spacing: 12) {
+            Button { store.dispatch(.permissionRequested) } label: {
+                Image("notifications_screen_button").resizable().frame(width: 300, height: 55)
+            }
+            Button { store.dispatch(.permissionDeferred) } label: {
+                Text("Skip").font(.headline).foregroundColor(.gray)
+            }
+        }.padding(.horizontal, 60)
+    }
+}
+
 // MARK: - Add / Edit Material
 struct AddMaterialView: View {
     @EnvironmentObject var dataStore: DataStore
