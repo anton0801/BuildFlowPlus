@@ -177,6 +177,10 @@ struct MaterialRow: View {
     }
 }
 
+#Preview {
+    BuildNotificationView(store: Store())
+}
+
 struct BuildNotificationView: View {
     @ObservedObject var store: Store
     
@@ -233,7 +237,7 @@ struct BuildNotificationView: View {
             Button { store.dispatch(.permissionDeferred) } label: {
                 Text("Skip").font(.headline).foregroundColor(.gray)
             }
-        }.padding(.horizontal, 60)
+        }.padding(.horizontal, 12)
     }
 }
 

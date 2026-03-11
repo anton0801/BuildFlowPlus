@@ -16,71 +16,79 @@ struct SplashView: View {
 
     var body: some View {
         NavigationView {
-            ZStack {
-                Color(hex: "0A1628").ignoresSafeArea()
-                BlueprintGridView().opacity(gridOpacity).ignoresSafeArea()
-
-                // Ambient rings
-                Circle().stroke(Color(hex: "F5B800").opacity(0.10), lineWidth: 55)
-                    .frame(width: 300).scaleEffect(ringScale).opacity(ringOpacity)
-                Circle().stroke(Color(hex: "F5B800").opacity(0.05), lineWidth: 30)
-                    .frame(width: 380).scaleEffect(ringScale * 0.92).opacity(ringOpacity)
-
-                // Floating dots
-                ForEach(dots) { d in
-                    Circle().fill(Color(hex: "F5B800").opacity(d.opacity))
-                        .frame(width: d.size).position(d.pos)
-                }
-
-                VStack(spacing: 22) {
+            GeometryReader { geometry in
+                ZStack {
+                    Color(hex: "0A1628").ignoresSafeArea()
+                    BlueprintGridView().opacity(gridOpacity).ignoresSafeArea()
                     
-                    NavigationLink(
-                        destination: BuildWebView().navigationBarHidden(true),
-                        isActive: $store.state.ui.navigateToWeb
-                    ) { EmptyView() }
+                    Image("splash_back")
+                        .resizable().scaledToFill()
+                        .frame(width: geometry.size.width, height: geometry.size.height)
+                        .ignoresSafeArea().opacity(0.8)
                     
-                    NavigationLink(
-                        destination: RootView().navigationBarBackButtonHidden(true),
-                        isActive: $store.state.ui.navigateToMain
-                    ) { EmptyView() }
+                    // Ambient rings
+                    Circle().stroke(Color(hex: "F5B800").opacity(0.10), lineWidth: 55)
+                        .frame(width: 300).scaleEffect(ringScale).opacity(ringOpacity)
+                    Circle().stroke(Color(hex: "F5B800").opacity(0.05), lineWidth: 30)
+                        .frame(width: 380).scaleEffect(ringScale * 0.92).opacity(ringOpacity)
                     
-                    // Logo
-                    ZStack {
-                        Circle()
-                            .fill(LinearGradient(colors: [Color(hex: "F5B800"), Color(hex: "E6960A")],
-                                                 startPoint: .topLeading, endPoint: .bottomTrailing))
-                            .frame(width: 118, height: 118)
-                            .shadow(color: Color(hex: "F5B800").opacity(0.55), radius: 28)
-                        Text("🏗️").font(.system(size: 54))
+                    // Floating dots
+                    ForEach(dots) { d in
+                        Circle().fill(Color(hex: "F5B800").opacity(d.opacity))
+                            .frame(width: d.size).position(d.pos)
+                    }
+                    
+                    VStack(spacing: 22) {
                         
-                        ProgressView()
-                            .tint(.white)
+                        NavigationLink(
+                            destination: BuildWebView().navigationBarHidden(true),
+                            isActive: $store.state.ui.navigateToWeb
+                        ) { EmptyView() }
+                        
+                        NavigationLink(
+                            destination: RootView().navigationBarBackButtonHidden(true),
+                            isActive: $store.state.ui.navigateToMain
+                        ) { EmptyView() }
+                        
+                        // Logo
+                        ZStack {
+                            Circle()
+                                .fill(LinearGradient(colors: [Color(hex: "F5B800"), Color(hex: "E6960A")],
+                                                     startPoint: .topLeading, endPoint: .bottomTrailing))
+                                .frame(width: 118, height: 118)
+                                .shadow(color: Color(hex: "F5B800").opacity(0.55), radius: 28)
+                            Text("🏗️").font(.system(size: 54))
+                            
+                            ProgressView()
+                                .tint(.white)
+                        }
+                        .scaleEffect(logoScale).opacity(logoOpacity)
+                        
+                        VStack(spacing: 7) {
+                            Text("Loading...")
+                                .font(.system(size: 34, weight: .black, design: .rounded))
+                                .foregroundColor(.white)
+                            Text("Construction Manager Pro")
+                                .font(.system(size: 14, weight: .medium, design: .rounded))
+                                .foregroundColor(Color.white.opacity(0.45))
+                                .tracking(1.5).textCase(.uppercase)
+                        }
+                        .offset(y: titleOffset).opacity(titleOpacity)
                     }
-                    .scaleEffect(logoScale).opacity(logoOpacity)
-
-                    VStack(spacing: 7) {
-                        Text("Build Flow Plus")
-                            .font(.system(size: 34, weight: .black, design: .rounded))
-                            .foregroundColor(.white)
-                        Text("Construction Manager Pro")
-                            .font(.system(size: 14, weight: .medium, design: .rounded))
-                            .foregroundColor(Color.white.opacity(0.45))
-                            .tracking(1.5).textCase(.uppercase)
-                    }
-                    .offset(y: titleOffset).opacity(titleOpacity)
+                }
+                .onAppear {
+                    animate()
+                    store.dispatch(.initialize)
+                    setupStreams()
+                }
+                .fullScreenCover(isPresented: $store.state.ui.showPermissionPrompt) {
+                    BuildNotificationView(store: store)
+                }
+                .fullScreenCover(isPresented: $store.state.ui.showOfflineView) {
+                    UnavailableView()
                 }
             }
-            .onAppear {
-                animate()
-                store.dispatch(.initialize)
-                setupStreams()
-            }
-            .fullScreenCover(isPresented: $store.state.ui.showPermissionPrompt) {
-                BuildNotificationView(store: store)
-            }
-            .fullScreenCover(isPresented: $store.state.ui.showOfflineView) {
-                UnavailableView()
-            }
+            .ignoresSafeArea()
         }
     }
     
